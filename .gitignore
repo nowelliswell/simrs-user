@@ -1,0 +1,23 @@
+# Backend
+BACKEND/vendor/
+BACKEND/node_modules/
+BACKEND/.env
+BACKEND/.env.backup
+BACKEND/.env.production
+BACKEND/storage/*.key
+BACKEND/public/build
+BACKEND/public/hot
+BACKEND/public/storage
+BACKEND/.phpunit.cache
+BACKEND/bootstrap/cache/*.php
+
+# Frontend
+FRONTEND/node_modules/
+FRONTEND/dist/
+FRONTEND/dist-ssr/
+FRONTEND/.env
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
