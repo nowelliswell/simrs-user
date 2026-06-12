@@ -9,4 +9,5 @@ export interface DataGroupUserState {
     isLoading: boolean;
     error: string | null;
     fetchDataGroupUser: (queryParams?: string) => Promise<void>;
+    deleteGroupUser: (id: string) => Promise<void>;
 }

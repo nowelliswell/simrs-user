@@ -32,20 +32,73 @@ class PegawaiController extends Controller
 
     public function detailUser($id)
     {
+        // Fetch user by NIK (join pegawai → user), sehingga tetap bekerja
+        // meskipun id_user sudah diubah dari nilai NIK semula
         $selectedUser = DB::selectOne("
         SELECT user.*,
                AES_DECRYPT(user.id_user, 'nur') AS id_user, 
                AES_DECRYPT(user.password, 'windi') AS password, 
                pegawai.nama
-        FROM user
-        LEFT JOIN pegawai ON pegawai.nik = AES_DECRYPT(user.id_user, 'nur')
-        WHERE id_user = AES_ENCRYPT(?, 'nur') 
+        FROM pegawai
+        LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+            OR user.id_user = AES_ENCRYPT(pegawai.nik, 'nur')
+        WHERE pegawai.nik = ?
         LIMIT 1", [$id]);
 
         return response()->json([
             'message' => 'Success',
             'data' => $selectedUser
         ]);
+    }
+
+    public function editUsernamePassword(Request $request, $nik)
+    {
+        $request->validate([
+            'id_user_baru'   => 'required|string|max:255',
+            'password_baru'  => 'required|string|max:255',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Cari user via NIK di tabel pegawai (identifier yang tidak pernah berubah)
+            // Kondisi OR menangani dua kemungkinan:
+            // 1. id_user masih sama dengan NIK (belum pernah diubah)
+            // 2. id_user sudah pernah diubah ke nilai lain
+            $existingUser = DB::selectOne("
+                SELECT user.id_user
+                FROM pegawai
+                LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+                WHERE pegawai.nik = ?
+                LIMIT 1
+            ", [$nik]);
+
+            if (!$existingUser) {
+                return response()->json([
+                    'message' => 'User tidak ditemukan untuk NIK tersebut.',
+                ], 404);
+            }
+
+            $affected = DB::table('user')
+                ->where('id_user', $existingUser->id_user)
+                ->update([
+                    'id_user'  => DB::raw("AES_ENCRYPT('{$request->id_user_baru}', 'nur')"),
+                    'password' => DB::raw("AES_ENCRYPT('{$request->password_baru}', 'windi')"),
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Username dan password berhasil diperbarui.',
+                'data'    => $affected,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Terjadi kesalahan.',
+                'error'   => $th->getMessage(),
+            ], 500);
+        }
     }
 
     public function copyAkses(Request $request)

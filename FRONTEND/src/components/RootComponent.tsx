@@ -1,5 +1,5 @@
 import { Sidebar } from "flowbite-react";
-import { HiChartPie, HiInbox, HiUser, HiViewBoards } from "react-icons/hi";
+import { HiChartPie, HiInbox, HiViewBoards } from "react-icons/hi";
 import { Outlet } from "react-router-dom";
 import { Bounce, ToastContainer } from "react-toastify";
 
@@ -36,9 +36,7 @@ function RootComponent() {
                                 <Sidebar.Item href="/group-user" icon={HiInbox}>
                                     Group User
                                 </Sidebar.Item>
-                                <Sidebar.Item href="/Edit User" icon={HiUser}>
-                                    Edit ID dan Password
-                                </Sidebar.Item>
+
                             </Sidebar.ItemGroup>
                         </Sidebar.Items>
                     </Sidebar>

@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Label, Table, TextInput } from "flowbite-react"
+import { Breadcrumb, Table } from "flowbite-react"
 import { Link, useSearchParams } from "react-router-dom";
 import GroupUserStore from "../store/GroupUserStore";
 import { useEffect, useState, FormEvent } from "react";
@@ -11,7 +11,7 @@ import GroupUserService from "../utils/GroupUserService";
 function GroupUserComponent() {
     const [loadingAdd, setLoadingAdd] = useState<boolean>(false);
     const [errorAdd, setErrorAdd] = useState<string | null>(null);
-    const { groupUsers, isLoading, error, fetchDataGroupUser } = GroupUserStore();
+    const { groupUsers, isLoading, error, fetchDataGroupUser, deleteGroupUser } = GroupUserStore();
     const [searchParams] = useSearchParams();
     const [openModal, setOpenModal] = useState(false);
 
@@ -63,6 +63,34 @@ function GroupUserComponent() {
         }
     }
 
+    const handleDelete = async (id: string, namaGroup: string) => {
+        if (!window.confirm(`Hapus group "${namaGroup}"? Semua anggota dalam group ini juga akan terhapus.`)) return;
+        try {
+            await deleteGroupUser(id);
+            toast.success('Group berhasil dihapus', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                theme: "colored",
+                transition: Bounce,
+            });
+        } catch (err) {
+            toast.error('Gagal menghapus group', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                theme: "colored",
+                transition: Bounce,
+            });
+        }
+    }
+
     const handleSesuaikanUser = async (id: string) => {
         await axios.get(`${import.meta.env.VITE_API_URL}/api/copy-user-group/${id}`).then((response) => {
             toast.success('Success', {
@@ -106,15 +134,24 @@ function GroupUserComponent() {
                 </Breadcrumb>
             </div>
 
-            <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                <form className="flex max-w-md flex-col gap-4" onSubmit={handleSubmitCreateSatuan}>
-                    <div>
-                        <div className="mb-2 block">
-                            <Label htmlFor="email1" value="Your email" />
-                        </div>
-                        <TextInput id="email1" name="nama_group" type="text" required />
-                    </div>
-                    <Button type="submit">Submit</Button>
+            <div className="bg-white rounded-md border shadow-sm w-full h-full flex items-center px-6">
+                <form className="flex items-center gap-4" onSubmit={handleSubmitCreateSatuan}>
+                    <label className="text-sm font-medium text-gray-600 whitespace-nowrap">Nama Group</label>
+                    <input
+                        id="email1"
+                        name="nama_group"
+                        type="text"
+                        required
+                        className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-72"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loadingAdd}
+                        className="px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loadingAdd ? 'Menyimpan...' : 'Tambah Group User Baru'}
+                    </button>
+                    {errorAdd && <p className="text-red-500 text-sm">{errorAdd}</p>}
                 </form>
             </div>
 
@@ -154,6 +191,10 @@ function GroupUserComponent() {
 
                                         <button onClick={() => { handleSesuaikanUser(item.id) }} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
                                             Sesuaikan Akses
+                                        </button>
+
+                                        <button onClick={() => { handleDelete(item.id, item.nama_group) }} className="font-medium text-red-600 hover:underline active:scale-95">
+                                            Hapus
                                         </button>
                                     </div>
                                 </Table.Cell>

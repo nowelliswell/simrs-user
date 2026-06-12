@@ -37,7 +37,7 @@ async function deleteData(id: string) {
     try {
         const url = `${import.meta.env.VITE_API_URL}/api/${prefix}/${id}`;
         const response = await axios.delete(url);
-        return response.data; // Akses langsung response.data
+        return response.data;
     } catch (error) {
         throw error;
     }

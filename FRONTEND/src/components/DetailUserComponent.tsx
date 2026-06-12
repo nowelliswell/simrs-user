@@ -1,24 +1,35 @@
 import { useParams } from "react-router-dom";
 import DetailUserStore from "../store/DetailUserStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { Table } from "flowbite-react";
 import UserService from "../utils/UserService";
 import DataFetchingNotFound from "./DataFetchingNotFound";
+import { Bounce, toast } from "react-toastify";
 
 function DetailUserComponent() {
-    const { user, isLoading, error, fetchDataDetailUser } = DetailUserStore();
+    const { user, isLoading, error, fetchDataDetailUser, editUsernamePassword } = DetailUserStore();
     const { id } = useParams();
-    const [search, setSearch] = useState(''); // State untuk pencarian
+    const [search, setSearch] = useState('');
+    const [usernameInput, setUsernameInput] = useState('');
+    const [passwordInput, setPasswordInput] = useState('');
+    const [loadingSave, setLoadingSave] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             if (id) {
-                await fetchDataDetailUser(id); // Tunggu hingga fetch selesai
+                await fetchDataDetailUser(id);
             }
         };
-
         fetchData();
     }, [id]);
+
+    // Sync input fields saat data user berhasil di-fetch
+    useEffect(() => {
+        if (user) {
+            setUsernameInput(user.id_user ?? '');
+            setPasswordInput(user.password ?? '');
+        }
+    }, [user]);
 
     const handleClickGanti = async (namaKolom: string, valueKolom: string) => {
         if (id) {
@@ -26,19 +37,85 @@ function DetailUserComponent() {
                 await UserService.gantiAksesUser(id, namaKolom, valueKolom);
                 fetchDataDetailUser(id);
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         }
-    }
+    };
+
+    const handleSimpanCredential = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!id) return;
+        setLoadingSave(true);
+        try {
+            await editUsernamePassword(id, usernameInput, passwordInput);
+            toast.success('Username dan password berhasil diperbarui', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                theme: "colored",
+                transition: Bounce,
+            });
+            // Refetch agar data terbaru tampil
+            await fetchDataDetailUser(id);
+        } catch (err) {
+            toast.error('Gagal memperbarui username / password', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: false,
+                theme: "colored",
+                transition: Bounce,
+            });
+        } finally {
+            setLoadingSave(false);
+        }
+    };
 
 
     if (user) {
         return (
-            <div className='overflow-hidden py-3 pr-3 grid grid-rows-[5rem_1fr] gap-4'>
-                <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                    <p>{user.nama}</p>
-                    <p>{user.id_user}/{user.password}</p>
+            <div className='overflow-hidden py-3 pr-3 grid grid-rows-[auto_1fr] gap-4'>
+                {/* Card atas: form edit username & password */}
+                <div className="bg-white rounded-md border shadow-sm p-5 w-full">
+                    <h2 className="font-bold text-xl text-gray-700 mb-1">{user.nama}</h2>
+                    <p className="text-sm text-gray-400 mb-4">NIK: {id}</p>
+                    <form onSubmit={handleSimpanCredential} className="flex flex-wrap items-end gap-4">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-600">Username</label>
+                            <input
+                                type="text"
+                                value={usernameInput}
+                                onChange={(e) => setUsernameInput(e.target.value)}
+                                required
+                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-60"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-sm font-medium text-gray-600">Password</label>
+                            <input
+                                type="text"
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                required
+                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-60"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={loadingSave}
+                            className="px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loadingSave ? 'Menyimpan...' : 'Simpan'}
+                        </button>
+                    </form>
                 </div>
+
+                {/* Card bawah: tabel akses */}
                 <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
                     <div className="w-full p-4 flex justify-between gap-6">
                         <form id="search-form" role="search" className="w-[24rem]">

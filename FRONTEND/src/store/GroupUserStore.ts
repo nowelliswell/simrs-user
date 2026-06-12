@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { DataGroupUserState } from '../interface/GroupUserInterface';
 import GroupUserService from "../utils/GroupUserService";
 
-const GroupUserStore = create<DataGroupUserState>()((set) => ({
+const GroupUserStore = create<DataGroupUserState>()((set, get) => ({
     groupUsers: [],
     isLoading: false,
     error: null,
@@ -14,7 +14,13 @@ const GroupUserStore = create<DataGroupUserState>()((set) => ({
         } catch (error: any) {
             set({ error: error.message || 'Something went wrong', isLoading: false });
         }
-    }
+    },
+    deleteGroupUser: async (id: string) => {
+        await GroupUserService.deleteData(id);
+        set((state) => ({
+            groupUsers: state.groupUsers.filter((g) => g.id !== id),
+        }));
+    },
 }))
 
 export default GroupUserStore;

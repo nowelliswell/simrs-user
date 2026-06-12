@@ -25,15 +25,16 @@ use Illuminate\Support\Facades\Route;
 Route::get("/pegawai", [PegawaiController::class, 'index']);
 Route::get("/detail-user/{id}", [PegawaiController::class, 'detailUser']);
 Route::post("/ganti-akses-user/{id}", [PegawaiController::class, 'editSatuUser']);
+Route::post("/edit-username-password/{nik}", [PegawaiController::class, 'editUsernamePassword']);
 
 Route::get("/group-user", [GroupUserController::class, 'index']);
 Route::post("/group-user", [GroupUserController::class, 'store']);
 Route::patch("/group-user", [GroupUserController::class, 'update']);
-Route::delete("/group-user", [GroupUserController::class, 'destroy']);
+Route::delete("/group-user/{id}", [GroupUserController::class, 'destroy']);
 
 Route::get("/anggota-group-user", [AnggotaControllerController::class, 'index']);
 Route::post("/anggota-group-user", [AnggotaControllerController::class, 'store']);
 Route::delete("/anggota-group-user/{id}", [AnggotaControllerController::class, 'hapusAnggota']);
 Route::post("/set-leader", [AnggotaControllerController::class, 'setLeader']);
 
-Route::get("/copy-user-group/{id}", [GroupUserController::class, 'copyUserBerdasarkanGroup']);
+Route::post("/copy-akses", [PegawaiController::class, 'copyAkses']);

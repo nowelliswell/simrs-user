@@ -21,7 +21,10 @@ const DetailUserStore = create<DataUserState>()((set) => ({
         } catch (error: any) {
             set({ error: error.message || 'Something went wrong', isLoading: false });
         }
-    }
+    },
+    editUsernamePassword: async (nik: string, idUserBaru: string, passwordBaru: string) => {
+        await UserService.editUsernamePassword(nik, idUserBaru, passwordBaru);
+    },
 }))
 
 export default DetailUserStore;
