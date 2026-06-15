@@ -26,6 +26,7 @@ Route::get("/pegawai", [PegawaiController::class, 'index']);
 Route::get("/detail-user/{id}", [PegawaiController::class, 'detailUser']);
 Route::post("/ganti-akses-user/{id}", [PegawaiController::class, 'editSatuUser']);
 Route::post("/edit-username-password/{nik}", [PegawaiController::class, 'editUsernamePassword']);
+Route::delete("/delete-user/{nik}", [PegawaiController::class, 'deleteUser']);
 
 Route::get("/group-user", [GroupUserController::class, 'index']);
 Route::post("/group-user", [GroupUserController::class, 'store']);
@@ -38,3 +39,5 @@ Route::delete("/anggota-group-user/{id}", [AnggotaControllerController::class, '
 Route::post("/set-leader", [AnggotaControllerController::class, 'setLeader']);
 
 Route::post("/copy-akses", [PegawaiController::class, 'copyAkses']);
+
+Route::get("/copy-user-group/{id}", [GroupUserController::class, 'copyUserBerdasarkanGroup']);

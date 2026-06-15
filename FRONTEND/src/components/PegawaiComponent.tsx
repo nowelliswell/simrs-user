@@ -80,6 +80,22 @@ function PegawaiComponent() {
         }
     };
 
+    const handleDeleteUser = async (nik: string, nama: string) => {
+        if (!window.confirm(`Hapus akses user "${nama}" (${nik})? Data akses user ini akan dihapus permanen.`)) return;
+        try {
+            await UserService.deleteUser(nik);
+            toast.success(`Akses user ${nama} berhasil dihapus`, {
+                position: 'top-right', autoClose: 5000, theme: 'colored', transition: Bounce,
+            });
+            const queryString = searchParams.toString();
+            fetchDataPegawai(queryString ? `?${queryString}` : '');
+        } catch {
+            toast.error(`Gagal menghapus akses user ${nama}`, {
+                position: 'top-right', autoClose: 5000, theme: 'colored', transition: Bounce,
+            });
+        }
+    };
+
     const handleCopy = async (arahAkeB: boolean) => {
         if (!userA || !userB) return;
         const sumber = arahAkeB ? userA.nik : userB.nik;
@@ -148,7 +164,16 @@ function PegawaiComponent() {
                                     <Table.Row className="bg-white" key={item.id}>
                                         <Table.Cell className="font-bold text-center">{index + 1}</Table.Cell>
                                         <Table.Cell>{item.nik}</Table.Cell>
-                                        <Table.Cell>{item.nama}</Table.Cell>
+                                        <Table.Cell>
+                                            <div className="flex items-center gap-2">
+                                                {item.nama}
+                                                {!item.has_user && (
+                                                    <span className="text-xs font-medium text-orange-500 bg-orange-50 border border-orange-200 rounded px-2 py-0.5 whitespace-nowrap">
+                                                        Belum punya akses
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </Table.Cell>
                                         <Table.Cell>{item.jbtn}</Table.Cell>
                                         <Table.Cell>
                                             <div className="w-full flex items-center justify-center gap-6">
@@ -157,6 +182,16 @@ function PegawaiComponent() {
                                                         Edit
                                                     </button>
                                                 </Link>
+                                                {item.has_user ? (
+                                                    <button
+                                                        onClick={() => handleDeleteUser(item.nik, item.nama)}
+                                                        className="font-medium text-red-600 hover:underline active:scale-95"
+                                                    >
+                                                        Hapus Akses
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-gray-300 text-sm cursor-default">Hapus Akses</span>
+                                                )}
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>

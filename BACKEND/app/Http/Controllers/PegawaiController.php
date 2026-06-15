@@ -9,21 +9,26 @@ class PegawaiController extends Controller
 {
     public function index(Request $request)
     {
-        // Mulai query untuk tabel 'pegawai'
-        $query = DB::table('pegawai')->select(['id', 'nik', 'nama', 'jbtn']);
+        // Join ke tabel user untuk cek apakah pegawai sudah punya akses
+        $query = DB::table('pegawai')
+            ->select([
+                'pegawai.id',
+                'pegawai.nik',
+                'pegawai.nama',
+                'pegawai.jbtn',
+                DB::raw("CASE WHEN user.id_user IS NOT NULL THEN 1 ELSE 0 END AS has_user"),
+            ])
+            ->leftJoin('user', DB::raw("AES_DECRYPT(user.id_user, 'nur')"), '=', 'pegawai.nik');
 
-        // Pencarian berdasarkan kolom 'nama'
         if ($request->has('search') && $request->search != '') {
             $query->where(function ($query) use ($request) {
-                $query->where('nama', 'like', '%' . $request->search . '%')
-                    ->orWhere('nik', 'like', '%' . $request->search . '%');
+                $query->where('pegawai.nama', 'like', '%' . $request->search . '%')
+                    ->orWhere('pegawai.nik', 'like', '%' . $request->search . '%');
             });
         }
 
-        // Ambil hasil pencarian
         $pegawai = $query->get();
 
-        // Return hasil dalam format JSON
         return response()->json([
             'message' => 'Success',
             'data' => $pegawai
@@ -106,42 +111,59 @@ class PegawaiController extends Controller
         DB::beginTransaction();
 
         try {
+            // Cari akses user sumber via join pegawai
             $selectedUser = DB::selectOne("
-                SELECT *
-                FROM user
-                WHERE id_user = AES_ENCRYPT(?, 'nur') 
+                SELECT user.*
+                FROM pegawai
+                LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+                WHERE pegawai.nik = ?
                 LIMIT 1
             ", [$request->userParent]);
 
-            if ($selectedUser) {
-                $updateData = [];
-                foreach ($selectedUser as $key => $value) {
-                    if ($key != 'id_user' && $key != 'password') {
-                        $updateData[$key] = $value;
-                    }
-                }
+            if (!$selectedUser) {
+                DB::rollback();
+                return response()->json(['message' => 'User sumber tidak ditemukan atau belum punya akses.'], 404);
+            }
 
-                $tes = DB::table('user')
-                    ->whereRaw("id_user = AES_ENCRYPT(?, 'nur')", [$request->userChild])
+            // Ambil kolom akses (kecuali id_user dan password)
+            $updateData = [];
+            foreach ($selectedUser as $key => $value) {
+                if ($key != 'id_user' && $key != 'password') {
+                    $updateData[$key] = $value;
+                }
+            }
+
+            if (empty($updateData)) {
+                DB::rollback();
+                return response()->json(['message' => 'Tidak ada data akses yang bisa dicopy.'], 422);
+            }
+
+            // Cari user tujuan
+            $targetUser = DB::selectOne("
+                SELECT user.id_user
+                FROM pegawai
+                LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+                WHERE pegawai.nik = ?
+                LIMIT 1
+            ", [$request->userChild]);
+
+            if ($targetUser && $targetUser->id_user) {
+                // User tujuan sudah ada → UPDATE
+                DB::table('user')
+                    ->where('id_user', $targetUser->id_user)
                     ->update($updateData);
             } else {
-                DB::rollback();
-                return redirect()->back()->withInput()->withErrors(['error' => 'Id User Akun Tidak Ditemukan']);
+                // User tujuan belum ada → INSERT dengan id_user = NIK tujuan
+                $updateData['id_user'] = DB::raw("AES_ENCRYPT('{$request->userChild}', 'nur')");
+                $updateData['password'] = DB::raw("AES_ENCRYPT('1234', 'windi')");
+                DB::table('user')->insert($updateData);
             }
 
             DB::commit();
-            if ($tes) {
-                return response()->json([
-                    'message' => 'Success'
-                ]);
-            } else {
-                return response()->json([
-                    'message' => 'Failed'
-                ]);
-            }
+            return response()->json(['message' => 'Success']);
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->withInput()->withErrors(['error' => 'SALAH']);
+            return response()->json(['message' => 'Terjadi kesalahan.', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -185,6 +207,36 @@ class PegawaiController extends Controller
             return response()->json([
                 'message' => 'Failed'
             ]);
+        }
+    }
+
+    public function deletePegawai($nik)
+    {
+        DB::beginTransaction();
+        try {
+            // 1. Hapus akses user (jika ada)
+            DB::table('user')
+                ->whereRaw("AES_DECRYPT(id_user, 'nur') = ?", [$nik])
+                ->delete();
+
+            // 2. Hapus keanggotaan group (foreign key ke pegawai.nik)
+            DB::table('user_to_group_users')
+                ->where('nik_pegawai', $nik)
+                ->delete();
+
+            // 3. Hapus data pegawai
+            $deleted = DB::table('pegawai')->where('nik', $nik)->delete();
+
+            if (!$deleted) {
+                DB::rollBack();
+                return response()->json(['message' => 'Pegawai tidak ditemukan.'], 404);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Data pegawai berhasil dihapus.']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['message' => 'Terjadi kesalahan.', 'error' => $th->getMessage()], 500);
         }
     }
 

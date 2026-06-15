@@ -47,9 +47,20 @@ async function copyAkses(nikSumber: string, nikTujuan: string) {
     }
 }
 
+async function deleteUser(nik: string) {
+    try {
+        const baseUrl = `${import.meta.env.VITE_API_URL}/api/delete-user/${nik}`;
+        const response = await axios.delete(baseUrl);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export default {
     getDetail,
     gantiAksesUser,
     editUsernamePassword,
     copyAkses,
+    deleteUser,
 }

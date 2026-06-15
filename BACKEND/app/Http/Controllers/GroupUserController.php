@@ -112,70 +112,77 @@ class GroupUserController extends Controller
             if (!$leader) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'leader tidak ada'
+                    'message' => 'Leader tidak ada dalam group ini'
                 ], 404);
             }
 
+            // Cari akses leader via join pegawai (tahan perubahan username)
             $aksesLeader = DB::selectOne(
-                "SELECT *
-                FROM user
-                WHERE id_user = AES_ENCRYPT(?, 'nur') 
+                "SELECT user.*
+                FROM pegawai
+                LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+                WHERE pegawai.nik = ?
                 LIMIT 1",
                 [$leader->nik_pegawai]
             );
 
-            if (!$aksesLeader) {
+            if (!$aksesLeader || !$aksesLeader->id_user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'leader tidak user'
+                    'message' => 'Leader belum punya akses user'
                 ], 404);
             }
 
-            $properti = [];
+            // Ambil kolom akses saja — buang id_user dan password (raw binary dari leader)
+            $aksesData = [];
             foreach ($aksesLeader as $key => $value) {
-                $properti[$key] = $value;
+                if ($key !== 'id_user' && $key !== 'password') {
+                    $aksesData[$key] = $value;
+                }
             }
 
-            $res = array();
+            $res = [];
 
             $anggota = UserToGroupUser::where('id_group', $id)
                 ->where('is_leader', false)
                 ->get();
 
             foreach ($anggota as $item) {
+                // Cari user anggota via join pegawai (tahan perubahan username)
                 $checkUser = DB::selectOne(
-                    "SELECT 
-                AES_DECRYPT(user.id_user, 'nur') AS id_user, 
-                AES_DECRYPT(user.password, 'windi') AS password
-                    FROM user
-                    WHERE id_user = AES_ENCRYPT(?, 'nur') 
-                    LIMIT 1",
+                    "SELECT user.id_user,
+                            AES_DECRYPT(user.id_user, 'nur') AS username,
+                            AES_DECRYPT(user.password, 'windi') AS pwd
+                     FROM pegawai
+                     LEFT JOIN user ON AES_DECRYPT(user.id_user, 'nur') = pegawai.nik
+                     WHERE pegawai.nik = ?
+                     LIMIT 1",
                     [$item->nik_pegawai]
                 );
 
-                if ($checkUser) {
-                    $properti['id_user'] =  DB::raw("AES_ENCRYPT('$checkUser->id_user', 'nur')");
-                    $properti['password'] = DB::raw("AES_ENCRYPT('$checkUser->password', 'windi')");
-
+                if ($checkUser && $checkUser->id_user) {
+                    // Anggota sudah punya user → UPDATE akses saja, pertahankan id_user & password
                     DB::table('user')
-                        ->whereRaw("id_user = AES_ENCRYPT(?, 'nur')", [$item->nik_pegawai])
-                        ->update($properti);
+                        ->where('id_user', $checkUser->id_user)
+                        ->update($aksesData);
 
-                    $res[] = "berhasil update, $checkUser->id_user";
+                    $res[] = "berhasil update: {$checkUser->username}";
                 } else {
-                    $properti['id_user'] = DB::raw("AES_ENCRYPT('$item->nik_pegawai', 'nur')");
-                    $properti['password'] = DB::raw("AES_ENCRYPT('1234', 'windi')");
+                    // Anggota belum punya user → INSERT dengan NIK sebagai username, password default 1234
+                    $newData = $aksesData;
+                    $newData['id_user'] = DB::raw("AES_ENCRYPT('{$item->nik_pegawai}', 'nur')");
+                    $newData['password'] = DB::raw("AES_ENCRYPT('1234', 'windi')");
 
-                    DB::table('user')->insert($properti);
-                    $res[] = "berhasil tambah baru, $item";
+                    DB::table('user')->insert($newData);
+                    $res[] = "berhasil tambah baru: {$item->nik_pegawai}";
                 }
             }
 
             DB::commit();
-            return response()->json(["data" => $res], 200);
+            return response()->json(['success' => true, 'data' => $res], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(["error" => $th->getMessage()], 400);
+            return response()->json(['success' => false, 'error' => $th->getMessage()], 400);
         }
     }
 }

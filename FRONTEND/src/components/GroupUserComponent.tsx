@@ -93,33 +93,32 @@ function GroupUserComponent() {
 
     const handleSesuaikanUser = async (id: string) => {
         await axios.get(`${import.meta.env.VITE_API_URL}/api/copy-user-group/${id}`).then((response) => {
-            toast.success('Success', {
+            toast.success('Sesuaikan akses berhasil', {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: false,
-                progress: undefined,
                 theme: "colored",
                 transition: Bounce,
             });
-
-            console.log(response.data.data);
+            console.log(response.data);
         }).catch((err) => {
-            toast.error('Gagal', {
+            const msg = err?.response?.data?.error
+                ?? err?.response?.data?.message
+                ?? 'Terjadi kesalahan';
+            toast.error(`Gagal: ${msg}`, {
                 position: "top-right",
-                autoClose: 5000,
+                autoClose: 8000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: false,
-                progress: undefined,
                 theme: "colored",
                 transition: Bounce,
             });
-
-            console.log(err);
+            console.error('Sesuaikan akses error:', err?.response?.data);
         })
     }
 

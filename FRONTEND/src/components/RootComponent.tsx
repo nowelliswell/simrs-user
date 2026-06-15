@@ -30,9 +30,6 @@ function RootComponent() {
                                 <Sidebar.Item href="/bandingkan-akses" icon={HiViewBoards}>
                                     Bandingkan Akses
                                 </Sidebar.Item>
-                                <Sidebar.Item href="/copy-akses" icon={HiInbox}>
-                                    Copy Akses
-                                </Sidebar.Item>
                                 <Sidebar.Item href="/group-user" icon={HiInbox}>
                                     Group User
                                 </Sidebar.Item>
