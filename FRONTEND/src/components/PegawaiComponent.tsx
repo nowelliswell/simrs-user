@@ -194,6 +194,7 @@ function PegawaiComponent() {
                                 <Table.HeadCell className="text-center">NIK</Table.HeadCell>
                                 <Table.HeadCell className="text-center">Nama</Table.HeadCell>
                                 <Table.HeadCell className="text-center">Jabatan</Table.HeadCell>
+                                <Table.HeadCell className="text-center">Grup User</Table.HeadCell>
                                 <Table.HeadCell className="text-center w-[12rem]">Kontrol</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
@@ -212,6 +213,24 @@ function PegawaiComponent() {
                                             </div>
                                         </Table.Cell>
                                         <Table.Cell>{item.jbtn}</Table.Cell>
+                                        <Table.Cell className="text-center">
+                                            {item.nama_group ? (
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                                                    item.is_leader 
+                                                        ? 'bg-green-50 text-green-700 border-green-200' 
+                                                        : 'bg-blue-50 text-blue-700 border-blue-200'
+                                                }`}>
+                                                    {item.nama_group}
+                                                    {item.is_leader ? (
+                                                        <span className="text-[10px] font-bold bg-green-200 text-green-800 px-1 py-0.2 rounded-sm ml-1">
+                                                            Leader
+                                                        </span>
+                                                    ) : null}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm italic">-</span>
+                                            )}
+                                        </Table.Cell>
                                         <Table.Cell>
                                             <div className="w-full flex items-center justify-center gap-6">
                                                 <Link to={`/detail-user/${item.nik}`}>
@@ -343,7 +362,16 @@ function PegawaiComponent() {
                                                 <input type="radio" readOnly checked={userA?.nik === item.nik} className="accent-cyan-500" />
                                             </Table.Cell>
                                             <Table.Cell>{item.nik}</Table.Cell>
-                                            <Table.Cell>{item.nama}</Table.Cell>
+                                            <Table.Cell>
+                                                <div className="flex flex-col">
+                                                    <span>{item.nama}</span>
+                                                    {item.nama_group && (
+                                                        <span className="text-[11px] text-gray-500 font-medium italic mt-0.5">
+                                                            Grup: {item.nama_group} {item.is_leader ? '(Leader)' : ''}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </Table.Cell>
                                             <Table.Cell>{item.jbtn}</Table.Cell>
                                         </Table.Row>
                                     ))}
@@ -411,7 +439,16 @@ function PegawaiComponent() {
                                                 <input type="radio" readOnly checked={userB?.nik === item.nik} className="accent-purple-500" />
                                             </Table.Cell>
                                             <Table.Cell>{item.nik}</Table.Cell>
-                                            <Table.Cell>{item.nama}</Table.Cell>
+                                            <Table.Cell>
+                                                <div className="flex flex-col">
+                                                    <span>{item.nama}</span>
+                                                    {item.nama_group && (
+                                                        <span className="text-[11px] text-gray-500 font-medium italic mt-0.5">
+                                                            Grup: {item.nama_group} {item.is_leader ? '(Leader)' : ''}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </Table.Cell>
                                             <Table.Cell>{item.jbtn}</Table.Cell>
                                         </Table.Row>
                                     ))}

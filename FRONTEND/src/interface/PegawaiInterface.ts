@@ -4,6 +4,8 @@ export interface DataPegawai {
     nama: string
     jbtn: string
     has_user: number // 1 = punya akses, 0 = belum punya akses
+    nama_group?: string
+    is_leader?: number | boolean
 }
 
 export interface PaginationInfo {

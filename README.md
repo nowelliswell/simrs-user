@@ -22,6 +22,7 @@ Aplikasi manajemen hak akses user untuk sistem SIMRS (Sistem Informasi Manajemen
 - Tambah / hapus anggota ke dalam group dengan list pegawai yang memiliki paginasi penuh.
 - Set leader untuk setiap group dengan respons notifikasi Toast.
 - **Sesuaikan Akses** — Copy hak akses leader ke semua anggota group sekaligus menggunakan pemrosesan kueri massal (*Bulk Processing*).
+- **Label & Leader Badge** — Menampilkan label nama grup secara real-time pada daftar pegawai dengan badge dinamis (Hijau untuk Leader, Biru untuk Anggota) untuk mempermudah identifikasi status keanggotaan. Terintegrasi juga pada halaman **Bandingkan Akses** dan otomatis mengunci tombol input pada halaman **Tambah Anggota** jika pegawai sudah tergabung di grup lain.
 
 ---
 

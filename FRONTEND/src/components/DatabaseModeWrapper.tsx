@@ -54,7 +54,7 @@ function DatabaseModeWrapper({ children }: DatabaseModeWrapperProps) {
                             </span>
                         </div>
                         <p className="text-xs font-bold text-amber-50 bg-black/15 px-3 py-1 rounded border border-amber-400/20">
-                            ⚠️ Hati-hati: Anda bekerja dengan data simulasi. Perubahan tidak akan mempengaruhi produksi.
+                            ⚠️ Hati-hati: Anda bekerja dengan data simulasi. Perubahan tidak akan mempengaruhi database asli.
                         </p>
                     </div>
                 </div>

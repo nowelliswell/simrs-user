@@ -182,12 +182,27 @@ function TambahAnggota() {
                                         {((pagination?.current_page ?? 1) - 1) * (pagination?.per_page ?? 50) + index + 1}
                                     </Table.Cell>
                                     <Table.Cell>{item.nik}</Table.Cell>
-                                    <Table.Cell>{item.nama}</Table.Cell>
+                                    <Table.Cell>
+                                        <div className="flex flex-col">
+                                            <span>{item.nama}</span>
+                                            {item.nama_group && (
+                                                <span className="text-xs text-gray-500 font-medium italic mt-0.5">
+                                                    Grup saat ini: {item.nama_group} {item.is_leader ? '(Leader)' : ''}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Table.Cell>
                                     <Table.Cell>
                                         <div className="w-full flex items-center justify-center gap-6">
-                                            <button onClick={() => addNewAnggota(item.nik)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                Masukan
-                                            </button>
+                                            {item.nama_group ? (
+                                                <span className="text-xs text-gray-400 bg-gray-100 border border-gray-200 px-2 py-1 rounded cursor-not-allowed">
+                                                    Sudah Terdaftar
+                                                </span>
+                                            ) : (
+                                                <button onClick={() => addNewAnggota(item.nik)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
+                                                    Masukan
+                                                </button>
+                                            )}
                                         </div>
                                     </Table.Cell>
                                 </Table.Row>)

@@ -7,7 +7,7 @@ import DataFetchingNotFound from "./DataFetchingNotFound";
 import { Bounce, toast } from "react-toastify";
 
 function DetailUserComponent() {
-    const { user, isLoading, error, fetchDataDetailUser, editUsernamePassword } = DetailUserStore();
+    const { user, fetchDataDetailUser, editUsernamePassword } = DetailUserStore();
     const { id } = useParams();
     const [search, setSearch] = useState('');
     const [usernameInput, setUsernameInput] = useState('');

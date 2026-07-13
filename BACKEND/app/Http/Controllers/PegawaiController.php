@@ -17,8 +17,12 @@ class PegawaiController extends Controller
                 'pegawai.nama',
                 'pegawai.jbtn',
                 DB::raw("CASE WHEN user.id_user_plain IS NOT NULL THEN 1 ELSE 0 END AS has_user"),
+                'group_users.nama_group',
+                'user_to_group_users.is_leader',
             ])
-            ->leftJoin('user', 'user.id_user_plain', '=', 'pegawai.nik');
+            ->leftJoin('user', 'user.id_user_plain', '=', 'pegawai.nik')
+            ->leftJoin('user_to_group_users', 'user_to_group_users.nik_pegawai', '=', 'pegawai.nik')
+            ->leftJoin('group_users', 'group_users.id', '=', 'user_to_group_users.id_group');
 
         if ($request->has('search') && $request->search != '') {
             $search = trim($request->search);
