@@ -22,6 +22,7 @@ function PegawaiComponent() {
     const [loadingCopy, setLoadingCopy] = useState(false);
     const [searchA, setSearchA] = useState('');
     const [searchB, setSearchB] = useState('');
+    const [searchAkses, setSearchAkses] = useState('');
     const [debouncedA, setDebouncedA] = useState('');
     const [debouncedB, setDebouncedB] = useState('');
     const [pegawaisB, setPegawaisB] = useState<typeof pegawais>([]);
@@ -169,6 +170,10 @@ function PegawaiComponent() {
             ...Object.keys(aksesB).filter(k => !EXCLUDED.includes(k)),
           ]))
         : [];
+
+    const filteredKeys = allKeys.filter(key =>
+        key.toLowerCase().includes(searchAkses.toLowerCase())
+    );
 
     // ─── MODE NORMAL (/pegawai) ─────────────────────────────────────
     if (!isBandingkan) {
@@ -483,12 +488,23 @@ function PegawaiComponent() {
 
             {/* Tombol copy & tabel perbandingan */}
             <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full flex flex-col">
-                {/* Tombol copy */}
-                <div className="p-4 border-b flex items-center gap-4 flex-wrap">
-                    <span className="text-sm text-gray-500">
-                        {userA && userB ? `${userA.nama} ↔ ${userB.nama}` : 'Pilih User A dan User B untuk membandingkan akses'}
-                    </span>
-                    <div className="ml-auto flex gap-3">
+                {/* Tombol copy & Search */}
+                <div className="p-4 border-b flex items-center gap-4 flex-wrap justify-between">
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500 font-medium">
+                            {userA && userB ? `${userA.nama} ↔ ${userB.nama}` : 'Pilih User A dan User B untuk membandingkan akses'}
+                        </span>
+                        {aksesA && aksesB && (
+                            <input
+                                type="search"
+                                placeholder="Cari nama akses..."
+                                value={searchAkses}
+                                onChange={e => setSearchAkses(e.target.value)}
+                                className="px-3 py-1.5 border border-gray-200 rounded-md bg-gray-50 outline-none text-sm w-64 focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
+                            />
+                        )}
+                    </div>
+                    <div className="flex gap-3">
                         <button
                             onClick={() => handleCopy(true)}
                             disabled={!userA || !userB || loadingCopy}
@@ -508,40 +524,47 @@ function PegawaiComponent() {
 
                 {/* Tabel perbandingan */}
                 {aksesA && aksesB && allKeys.length > 0 ? (
-                    <div className="overflow-auto flex-1">
-                        <Table striped className="text-sm">
-                            <Table.Head className="sticky top-0 bg-white z-10">
-                                <Table.HeadCell>Nama Akses</Table.HeadCell>
-                                <Table.HeadCell className="text-center text-cyan-600">
-                                    {userA?.nama ?? 'User A'}
-                                </Table.HeadCell>
-                                <Table.HeadCell className="text-center text-purple-600">
-                                    {userB?.nama ?? 'User B'}
-                                </Table.HeadCell>
-                            </Table.Head>
-                            <Table.Body className="divide-y">
-                                {allKeys.map(key => {
-                                    const valA = String(aksesA[key] ?? '-');
-                                    const valB = String(aksesB[key] ?? '-');
-                                    const beda = valA !== valB;
-                                    return (
-                                        <Table.Row key={key} className={beda ? 'bg-yellow-50' : 'bg-white'}>
-                                            <Table.Cell className="font-medium">
-                                                {beda && <span className="mr-2 text-yellow-500">●</span>}
-                                                {key}
-                                            </Table.Cell>
-                                            <Table.Cell className={`text-center font-medium ${valA === 'true' ? 'text-green-500' : valA === 'false' ? 'text-red-400' : 'text-gray-400'}`}>
-                                                {valA}
-                                            </Table.Cell>
-                                            <Table.Cell className={`text-center font-medium ${valB === 'true' ? 'text-green-500' : valB === 'false' ? 'text-red-400' : 'text-gray-400'}`}>
-                                                {valB}
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    );
-                                })}
-                            </Table.Body>
-                        </Table>
-                    </div>
+                    filteredKeys.length > 0 ? (
+                        <div className="overflow-auto flex-1">
+                            <Table striped className="text-sm">
+                                <Table.Head className="sticky top-0 bg-white z-10">
+                                    <Table.HeadCell>Nama Akses</Table.HeadCell>
+                                    <Table.HeadCell className="text-center text-cyan-600">
+                                        {userA?.nama ?? 'User A'}
+                                    </Table.HeadCell>
+                                    <Table.HeadCell className="text-center text-purple-600">
+                                        {userB?.nama ?? 'User B'}
+                                    </Table.HeadCell>
+                                </Table.Head>
+                                <Table.Body className="divide-y">
+                                    {filteredKeys.map(key => {
+                                        const valA = String(aksesA[key] ?? '-');
+                                        const valB = String(aksesB[key] ?? '-');
+                                        const beda = valA !== valB;
+                                        return (
+                                            <Table.Row key={key} className={beda ? 'bg-yellow-50' : 'bg-white'}>
+                                                <Table.Cell className="font-medium">
+                                                    {beda && <span className="mr-2 text-yellow-500">●</span>}
+                                                    {key}
+                                                </Table.Cell>
+                                                <Table.Cell className={`text-center font-medium ${valA === 'true' ? 'text-green-500' : valA === 'false' ? 'text-red-400' : 'text-gray-400'}`}>
+                                                    {valA}
+                                                </Table.Cell>
+                                                <Table.Cell className={`text-center font-medium ${valB === 'true' ? 'text-green-500' : valB === 'false' ? 'text-red-400' : 'text-gray-400'}`}>
+                                                    {valB}
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        );
+                                    })}
+                                </Table.Body>
+                            </Table>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-8">
+                            <span className="text-base font-semibold">Tidak ditemukan</span>
+                            <span className="text-sm">Tidak ada hak akses yang cocok dengan "{searchAkses}"</span>
+                        </div>
+                    )
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
                         {!userA || !userB

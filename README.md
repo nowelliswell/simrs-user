@@ -16,6 +16,7 @@ Aplikasi manajemen hak akses user untuk sistem SIMRS (Sistem Informasi Manajemen
 - Tampilkan perbandingan hak akses side-by-side dalam satu tabel.
 - Perbedaan akses di-highlight otomatis (warna kuning).
 - Copy hak akses User A → User B atau sebaliknya secara instan (tanpa merusak database mode).
+- Filter pencarian nama hak akses secara instan (real-time) langsung pada tabel perbandingan.
 
 ### 👥 Group User
 - CRUD group user (tambah, lihat, edit nama grup inline, hapus).
