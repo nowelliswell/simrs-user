@@ -6,6 +6,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import DashboardComponent from './components/DashboardComponent.tsx';
 import PegawaiComponent from './components/PegawaiComponent.tsx';
 import DetailUserComponent from './components/DetailUserComponent.tsx';
 import GroupUserComponent from './components/GroupUserComponent.tsx';
@@ -19,6 +20,16 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <PegawaiComponent />,
+      }
+    ]
+  },
+  {
+    path: "/dashboard",
+    element: <RootComponent />,
+    children: [
+      {
+        path: "",
+        element: <DashboardComponent />,
       }
     ]
   },

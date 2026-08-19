@@ -43,3 +43,5 @@ Route::post("/copy-akses", [PegawaiController::class, 'copyAkses']);
 Route::get("/copy-user-group/{id}", [GroupUserController::class, 'copyUserBerdasarkanGroup']);
 
 Route::post("/ai-assistant/chat", [\App\Http\Controllers\AiAssistantController::class, 'chat']);
+
+Route::get("/dashboard/stats", [\App\Http\Controllers\DashboardController::class, 'index']);

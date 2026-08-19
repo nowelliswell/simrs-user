@@ -25,6 +25,13 @@ Aplikasi manajemen hak akses user untuk sistem SIMRS (Sistem Informasi Manajemen
 - **Sesuaikan Akses** — Copy hak akses leader ke semua anggota group sekaligus menggunakan pemrosesan kueri massal (*Bulk Processing*).
 - **Label & Leader Badge** — Menampilkan label nama grup secara real-time pada daftar pegawai dengan badge dinamis (Hijau untuk Leader, Biru untuk Anggota) untuk mempermudah identifikasi status keanggotaan. Terintegrasi juga pada halaman **Bandingkan Akses** dan otomatis mengunci tombol input pada halaman **Tambah Anggota** jika pegawai sudah tergabung di grup lain.
 
+### 📊 Dashboard Eksekutif & Statistik Hak Akses
+- **Live Database KPI Cards** — Memantau metrik total pegawai, user ber-hak akses, persentase adopsi SIMRS, dan jumlah grup peran.
+- **Distribusi Anggota per Group** — Grafik batang visual kapasitas anggota per divisi lengkap dengan badge status Leader.
+- **Top 7 Jabatan Pegawai** — Peringkat profesi pegawai terbanyak di rumah sakit.
+- **Audit & Keamanan Otomatis** — Peringatan langsung untuk grup yang belum memiliki Leader, pegawai yang belum terikat grup peran, dan tabel penanggung jawab (Leader) unit aktif.
+- **Reaktif Database Mode Switch** — Visualisasi otomatis berpindah data secara instan saat toggle DEV/PROD diubah.
+
 ### 🤖 AI Admin Assistant (Google Gemini 3.5 Flash-Lite)
 - **Floating Chat Widget (FAB)** — Widget asisten interaktif di pojok kanan bawah yang selalu siap membantu di setiap halaman.
 - **Natural Language Query** — Tanyakan statistik dan data SIMRS dalam bahasa natural Indonesia:
@@ -147,6 +154,7 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 | POST | `/api/set-leader` | Set leader group |
 | GET | `/api/copy-user-group/{id}` | Copy akses leader ke semua anggota group (Bulk) |
 | POST | `/api/ai-assistant/chat` | AI natural language search & assistant |
+| GET | `/api/dashboard/stats` | Agregasi data statistik KPI & audit keamanan dashboard |
 
 ---
 

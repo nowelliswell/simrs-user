@@ -1,5 +1,5 @@
 import { Sidebar } from "flowbite-react";
-import { HiChartPie, HiInbox, HiViewBoards, HiMenu, HiX } from "react-icons/hi";
+import { HiChartPie, HiInbox, HiViewBoards, HiMenu, HiX, HiHome } from "react-icons/hi";
 import { Outlet, useLocation } from "react-router-dom";
 import { Bounce, ToastContainer } from "react-toastify";
 import DatabaseModeWrapper from "./DatabaseModeWrapper";
@@ -78,16 +78,18 @@ function RootComponent() {
                                 </div>
                                 <Sidebar.Items>
                                     <Sidebar.ItemGroup>
-                                        <Sidebar.Item href="/" icon={HiChartPie}>
+                                        <Sidebar.Item href="/dashboard" icon={HiHome} active={location.pathname === '/dashboard'}>
+                                            Dashboard
+                                        </Sidebar.Item>
+                                        <Sidebar.Item href="/" icon={HiChartPie} active={location.pathname === '/' || location.pathname === '/pegawai'}>
                                             Pegawai
                                         </Sidebar.Item>
-                                        <Sidebar.Item href="/bandingkan-akses" icon={HiViewBoards}>
+                                        <Sidebar.Item href="/bandingkan-akses" icon={HiViewBoards} active={location.pathname === '/bandingkan-akses'}>
                                             Bandingkan Akses
                                         </Sidebar.Item>
-                                        <Sidebar.Item href="/group-user" icon={HiInbox}>
+                                        <Sidebar.Item href="/group-user" icon={HiInbox} active={location.pathname.startsWith('/group-user')}>
                                             Group User
                                         </Sidebar.Item>
-
                                     </Sidebar.ItemGroup>
                                 </Sidebar.Items>
                             </Sidebar>
