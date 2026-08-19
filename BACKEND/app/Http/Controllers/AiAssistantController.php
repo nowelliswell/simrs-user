@@ -43,21 +43,20 @@ KEMAMPUAN SISTEM:
 - Set leader group
 - Copy akses leader ke semua anggota group
 
-ATURAN:
-1. Jawab dalam Bahasa Indonesia yang ramah dan ringkas.
-2. Jika user bertanya tentang data, LAKUKAN QUERY dan tampilkan hasilnya.
-3. Jika user meminta aksi (ubah akses, copy, buat group, dll), jelaskan apa yang akan dilakukan dan LAKUKAN langsung.
-4. Untuk aksi berbahaya (hapus data), minta konfirmasi dulu.
-5. Format data dalam tabel jika memungkinkan.
-6. Jika pertanyaan di luar konteks SIMRS, jawab sopan bahwa kamu hanya bisa membantu urusan SIMRS.
+ATURAN KETAT:
+1. Jawab dalam Bahasa Indonesia yang ramah, profesional, dan ringkas.
+2. DILARANG KERAS MENGARANG DATA CONTOH atau menulis placeholder seperti "Menunggu data query database", "Contoh: Budi Santoso", dsb.
+3. Jika data tersedia di HASIL QUERY DATABASE di bawah, SAJIKAN SELURUH DATA TERSEBUT DALAM TABEL MARKDOWN YANG LENGKAP DAN JELAS.
+4. Jika data tidak ada di HASIL QUERY DATABASE, katakan secara jujur dan terus terang bahwa data tidak ditemukan di database SIMRS (jangan mengarang data fiktif).
+5. Jika pertanyaan di luar konteks SIMRS, jawab sopan bahwa kamu hanya asisten sistem SIMRS.
 PROMPT;
 
             // Proses perintah user — cek apakah bisa di-handle langsung
             $directResult = $this->tryDirectAction($request->message);
 
             if ($directResult) {
-                $systemPrompt .= "\n\nHASIL QUERY DATABASE:\n" . json_encode($directResult, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                $systemPrompt .= "\n\nGunakan data di atas untuk menjawab pertanyaan user. Format dengan rapi.";
+                $systemPrompt .= "\n\nHASIL QUERY DATABASE TERBARU:\n" . json_encode($directResult, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                $systemPrompt .= "\n\nPENTING: Sajikan seluruh data di atas ke dalam respons Anda secara lengkap dan akurat.";
             }
 
             // Kirim ke Gemini (gemini-3.5-flash-lite dengan paksa IPv4 untuk DNS instan)
@@ -202,65 +201,95 @@ PROMPT;
     {
         $msg = strtolower(trim($message));
 
-        // Cari pegawai
-        if (preg_match('/(?:cari|search|tampilkan|lihat|siapa)\s+(?:pegawai|karyawan|user|staff)?\s*(?:bernama|nama|dengan nama)?\s+(.+)/i', $message, $m)) {
-            $keyword = trim($m[1], ' "\'?.');
-            $results = DB::table('pegawai')
-                ->select('nik', 'nama', 'jbtn')
-                ->where('nama', 'like', "%{$keyword}%")
-                ->limit(20)
-                ->get();
-            return ['type' => 'search_pegawai', 'keyword' => $keyword, 'count' => $results->count(), 'data' => $results];
+        // 1. Cek Pencarian Anggota Group secara Dinamis berdasarkan nama group yang ada di DB
+        $allGroups = DB::table('group_users')->get();
+        foreach ($allGroups as $group) {
+            if (stripos($message, $group->nama_group) !== false) {
+                // Jika pesan menanyakan anggota/siapa/member/staf/isi/leader grup ini
+                if (preg_match('/(?:siapa|anggota|member|daftar|list|isi|staf|pegawai|orang|user|leader|lihat|tampilkan)/i', $message)) {
+                    $anggota = DB::table('user_to_group_users')
+                        ->leftJoin('pegawai', 'pegawai.nik', '=', 'user_to_group_users.nik_pegawai')
+                        ->where('user_to_group_users.id_group', $group->id)
+                        ->select('pegawai.nik', 'pegawai.nama', 'pegawai.jbtn', 'user_to_group_users.is_leader')
+                        ->orderBy('user_to_group_users.is_leader', 'desc')
+                        ->get();
+
+                    return [
+                        'type' => 'anggota_group',
+                        'group' => $group->nama_group,
+                        'group_id' => $group->id,
+                        'count' => $anggota->count(),
+                        'data' => $anggota
+                    ];
+                }
+            }
         }
 
-        // Detail akses user by NIK
-        if (preg_match('/(?:detail|akses|hak akses|lihat akses)\s+(?:user|pegawai)?\s*(\d{5,})/i', $message, $m)) {
+        // 2. Cek Pencarian Spesifik NIK (angka 4-25 digit)
+        if (preg_match('/\b(\d{4,25})\b/', $message, $m)) {
             $nik = $m[1];
             $user = DB::table('user')->where('id_user_plain', $nik)->first();
             $pegawai = DB::table('pegawai')->where('nik', $nik)->first();
-            if ($user && $pegawai) {
+            if ($pegawai) {
                 $aksesData = [];
-                foreach ($user as $key => $value) {
-                    if (!in_array($key, ['id_user', 'id_user_plain', 'password'])) {
-                        $aksesData[$key] = $value;
+                if ($user) {
+                    foreach ($user as $key => $value) {
+                        if (!in_array($key, ['id_user', 'id_user_plain', 'password'])) {
+                            $aksesData[$key] = $value;
+                        }
                     }
                 }
-                return ['type' => 'detail_akses', 'nik' => $nik, 'nama' => $pegawai->nama, 'akses' => $aksesData];
+                return [
+                    'type' => 'detail_akses',
+                    'nik' => $nik,
+                    'nama' => $pegawai->nama,
+                    'jbtn' => $pegawai->jbtn,
+                    'has_user' => $user !== null,
+                    'akses' => $aksesData
+                ];
             }
         }
 
-        // List anggota group
-        if (preg_match('/(?:anggota|member|daftar|list)\s+(?:grup|group|kelompok)\s+(.+)/i', $message, $m)) {
-            $groupName = trim($m[1], ' "\'?.');
-            $group = DB::table('group_users')->where('nama_group', 'like', "%{$groupName}%")->first();
-            if ($group) {
-                $anggota = DB::table('user_to_group_users')
-                    ->leftJoin('pegawai', 'pegawai.nik', '=', 'user_to_group_users.nik_pegawai')
-                    ->where('user_to_group_users.id_group', $group->id)
-                    ->select('pegawai.nik', 'pegawai.nama', 'pegawai.jbtn', 'user_to_group_users.is_leader')
-                    ->get();
-                return ['type' => 'anggota_group', 'group' => $group->nama_group, 'count' => $anggota->count(), 'data' => $anggota];
-            }
-        }
-
-        // List semua group
-        if (preg_match('/(?:daftar|list|semua|tampilkan)\s+(?:grup|group)/i', $message)) {
+        // 3. List Semua Group
+        if (preg_match('/(?:daftar|list|semua|tampilkan|apa saja|ada apa|jumlah)\s+(?:grup|group)/i', $message) || preg_match('/^(?:group|grup|list group|daftar group)$/i', $msg)) {
             $groups = DB::table('group_users')
                 ->leftJoin('user_to_group_users', 'group_users.id', '=', 'user_to_group_users.id_group')
                 ->select('group_users.id', 'group_users.nama_group', DB::raw('COUNT(user_to_group_users.id) as jumlah_anggota'))
                 ->groupBy('group_users.id', 'group_users.nama_group')
+                ->orderByDesc('jumlah_anggota')
                 ->get();
             return ['type' => 'list_group', 'count' => $groups->count(), 'data' => $groups];
         }
 
-        // Hitung total pegawai & statistik akun
-        if (preg_match('/(?:berapa|total|jumlah|banyak|rekap|statistik|overview|data)\s*(?:semua|total\s*)?(?:pegawai|karyawan|user|staf|staff|akun)/i', $message) || preg_match('/^(?:total|statistik|rekap)\s*(?:pegawai|user)?$/i', $msg)) {
+        // 4. Hitung Total Pegawai & Statistik Akun
+        if (preg_match('/(?:berapa|total|jumlah|banyak|rekap|statistik|overview|dashboard|data)\s*(?:semua|total\s*)?(?:pegawai|karyawan|user|staf|staff|akun)/i', $message) || preg_match('/^(?:total|statistik|rekap)\s*(?:pegawai|user)?$/i', $msg)) {
             $total = DB::table('pegawai')->count();
             $withAccess = DB::table('pegawai')
                 ->leftJoin('user', 'user.id_user_plain', '=', 'pegawai.nik')
                 ->whereNotNull('user.id_user_plain')
                 ->count();
-            return ['type' => 'statistik', 'total_pegawai' => $total, 'punya_akses' => $withAccess, 'belum_akses' => $total - $withAccess];
+            return [
+                'type' => 'statistik',
+                'total_pegawai' => $total,
+                'punya_akses' => $withAccess,
+                'belum_akses' => $total - $withAccess
+            ];
+        }
+
+        // 5. Cari Pegawai by Nama
+        if (preg_match('/(?:cari|search|tampilkan|lihat|siapa|info|data)\s+(?:pegawai|karyawan|user|staff|staf|dokter|perawat|bidan)?\s*(?:bernama|nama|dengan nama)?\s*[:\s]?\s*([a-zA-Z0-9\s,\.\']+)/i', $message, $m)) {
+            $keyword = trim($m[1], ' "\'?.');
+            $keyword = preg_replace('/^(?:yang\s+bernama|bernama|nama)\s+/i', '', $keyword);
+            if (strlen($keyword) >= 2 && !in_array(strtolower($keyword), ['group', 'grup', 'user', 'pegawai', 'semua', 'total'])) {
+                $results = DB::table('pegawai')
+                    ->select('nik', 'nama', 'jbtn')
+                    ->where('nama', 'like', "%{$keyword}%")
+                    ->limit(15)
+                    ->get();
+                if ($results->isNotEmpty()) {
+                    return ['type' => 'search_pegawai', 'keyword' => $keyword, 'count' => $results->count(), 'data' => $results];
+                }
+            }
         }
 
         return null;
