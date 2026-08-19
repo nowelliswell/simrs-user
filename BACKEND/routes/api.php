@@ -41,3 +41,5 @@ Route::post("/set-leader", [AnggotaControllerController::class, 'setLeader']);
 Route::post("/copy-akses", [PegawaiController::class, 'copyAkses']);
 
 Route::get("/copy-user-group/{id}", [GroupUserController::class, 'copyUserBerdasarkanGroup']);
+
+Route::post("/ai-assistant/chat", [\App\Http\Controllers\AiAssistantController::class, 'chat']);

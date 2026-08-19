@@ -25,6 +25,16 @@ Aplikasi manajemen hak akses user untuk sistem SIMRS (Sistem Informasi Manajemen
 - **Sesuaikan Akses** — Copy hak akses leader ke semua anggota group sekaligus menggunakan pemrosesan kueri massal (*Bulk Processing*).
 - **Label & Leader Badge** — Menampilkan label nama grup secara real-time pada daftar pegawai dengan badge dinamis (Hijau untuk Leader, Biru untuk Anggota) untuk mempermudah identifikasi status keanggotaan. Terintegrasi juga pada halaman **Bandingkan Akses** dan otomatis mengunci tombol input pada halaman **Tambah Anggota** jika pegawai sudah tergabung di grup lain.
 
+### 🤖 AI Admin Assistant (Google Gemini 3.5 Flash-Lite)
+- **Floating Chat Widget (FAB)** — Widget asisten interaktif di pojok kanan bawah yang selalu siap membantu di setiap halaman.
+- **Natural Language Query** — Tanyakan statistik dan data SIMRS dalam bahasa natural Indonesia:
+  - *"Berapa total pegawai?"* → Menampilkan ringkasan pegawai yang memiliki akses vs belum punya akses.
+  - *"Cari pegawai bernama Ahmad"* → Pencarian cepat pegawai beserta NIK dan jabatannya.
+  - *"Lihat detail akses user 12345"* → Mengambil informasi hak akses spesifik user.
+  - *"Daftar semua group"* / *"Anggota group IT"* → Ringkasan grup dan daftar anggotanya.
+- **Respons Cepat (~1 Detik)** — Didukung oleh model `gemini-3.5-flash-lite` dengan latensi ultra-rendah.
+- **Rendering Markdown Otomatis** — Respons AI disajikan dengan format tabel HTML, teks tebal, dan daftar poin yang rapi.
+
 ---
 
 ## 🚀 Optimasi Performa & Keamanan (Update-1)
@@ -65,6 +75,11 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 * Mendeklarasikan tipe input event handler secara eksplisit.
 * Mengecualikan kolom pembantu `id_user_plain` dari tabel perbandingan akses.
 
+### 7. Integrasi AI Assistant & Optimasi Latensi
+* Mengintegrasikan Google Gemini API dengan model **`gemini-3.5-flash-lite`** yang menghasilkan respon instan (~1 detik) tanpa overhead deep thinking.
+* Bypass SSL certificate verification (`Http::withoutVerifying()`) untuk kompatibilitas Windows cURL local development.
+* Injeksi data kontekstual database (skema kolom akses & daftar grup) ke dalam system prompt sehingga jawaban AI akurat sesuai data riil SIMRS.
+
 ---
 
 ## Tech Stack
@@ -72,6 +87,7 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 | Layer | Teknologi |
 |-------|-----------|
 | Backend | Laravel 10, PHP >= 8.1, MySQL |
+| AI / LLM | Google Gemini API (`gemini-3.5-flash-lite`) |
 | Frontend | React 18, TypeScript, Vite |
 | UI | Flowbite React, Tailwind CSS |
 | State | Zustand |
@@ -88,11 +104,12 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 │   │   ├── Http/Controllers/
 │   │   │   ├── PegawaiController.php            # Pegawai, detail user, edit akses sargable, fulltext search
 │   │   │   ├── GroupUserController.php          # CRUD group + copy akses grup (Bulk Processing)
-│   │   │   └── AnggotaControllerController.php  # Manajemen anggota group & pencarian teroptimasi
+│   │   │   ├── AnggotaControllerController.php  # Manajemen anggota group & pencarian teroptimasi
+│   │   │   └── AiAssistantController.php        # AI Natural Language Assistant (Gemini API)
 │   │   └── Models/
 │   │       ├── GroupUser.php
 │   │       └── UserToGroupUser.php
-│   ├── routes/api.php                           # RESTful API routes (PUT untuk edit grup)
+│   ├── routes/api.php                           # RESTful API routes + AI endpoint
 │   └── database/migrations/                     # Migrasi tabel group_users & id_user_plain
 │
 └── FRONTEND/         # React + TypeScript
@@ -102,9 +119,10 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
         │   ├── DetailUserComponent.tsx          # Edit username, password & toggle akses
         │   ├── GroupUserComponent.tsx           # CRUD inline edit + tombol loading "Sesuaikan Akses"
         │   ├── TambahAnggota.tsx                # Paginasi pegawai + react-toastify + typed states
-        │   └── RootComponent.tsx                # Layout + sidebar
+        │   ├── AiChatWidget.tsx                 # Floating AI chat widget + markdown table renderer
+        │   └── RootComponent.tsx                # Layout + sidebar + AI widget
         ├── store/                               # Zustand state management
-        ├── utils/                               # Axios service layer
+        ├── utils/                               # Axios service layer (Pegawai, User, GroupUser, AiAssistant)
         └── interface/                           # TypeScript interfaces
 ```
 
@@ -128,6 +146,7 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 | DELETE | `/api/anggota-group-user/{id}` | Hapus anggota dari group |
 | POST | `/api/set-leader` | Set leader group |
 | GET | `/api/copy-user-group/{id}` | Copy akses leader ke semua anggota group (Bulk) |
+| POST | `/api/ai-assistant/chat` | AI natural language search & assistant |
 
 ---
 
@@ -138,6 +157,7 @@ Dalam rilis **Update-1**, kami telah menerapkan serangkaian optimasi tingkat lan
 - Composer
 - Node.js >= 18
 - MySQL (koneksi ke server DB yang dikonfigurasi di `.env`)
+- Google AI Studio API Key (untuk fitur AI Assistant)
 
 ### Backend Setup
 
@@ -149,6 +169,9 @@ composer install
 
 # Copy environment file
 cp .env.example .env
+
+# Tambahkan GEMINI_API_KEY pada file .env:
+# GEMINI_API_KEY=your_google_ai_studio_api_key
 
 # Jalankan migrasi database
 php artisan migrate

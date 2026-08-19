@@ -22,14 +22,14 @@ function SearchBoxComponent({ placeHolder }: { placeHolder: string }) {
     }, [searchValue]);
 
     return (
-        <div className="w-[24rem]">
+        <div className="w-full sm:w-[24rem]">
             <input
                 id="q"
                 placeholder={placeHolder}
                 type="search"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="px-2 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full"
+                className="px-3 py-2.5 outline-none border-gray-200 border rounded-lg bg-gray-50 w-full text-sm sm:text-base"
             />
         </div>
     )

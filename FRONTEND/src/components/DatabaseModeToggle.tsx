@@ -39,27 +39,28 @@ function DatabaseModeToggle({ onModeChange }: DatabaseModeToggleProps) {
     };
 
     return (
-        <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-600">Database Mode:</span>
-            <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+            <span className="hidden sm:inline text-sm font-medium text-gray-600">Database Mode:</span>
+            <span className="sm:hidden text-xs font-medium text-gray-600">DB:</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className={`text-xs font-semibold ${mode === 'development' ? 'text-blue-600' : 'text-gray-400'}`}>
                     DEV
                 </span>
                 <button
                     onClick={handleToggle}
-                    className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    className={`relative inline-flex h-6 w-12 sm:h-7 sm:w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                         mode === 'production'
                             ? 'bg-green-500 focus:ring-green-500'
                             : 'bg-blue-500 focus:ring-blue-500'
                     } cursor-pointer`}
                 >
                     <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
-                            mode === 'production' ? 'translate-x-8' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
+                            mode === 'production' ? 'translate-x-7 sm:translate-x-8' : 'translate-x-1'
                         }`}
                     />
                     <span
-                        className={`absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white transition-opacity ${
+                        className={`absolute inset-0 flex items-center justify-center text-[8px] sm:text-[9px] font-bold text-white transition-opacity ${
                             mode === 'production' ? 'opacity-100' : 'opacity-0'
                         }`}
                         style={{ paddingRight: '18px' }}

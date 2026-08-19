@@ -139,9 +139,9 @@ function TambahAnggota() {
     }, [id, getAnggota]);
 
     return (
-        <div className='overflow-hidden py-3 pr-3 grid grid-rows-[5rem_1fr] gap-4'>
+        <div className='overflow-hidden py-3 px-3 md:pr-3 md:pl-0 grid grid-rows-[auto_1fr] gap-3 sm:gap-4'>
             <div className="text-gray-600">
-                <h1 className="font-bold text-3xl mb-2">Group User</h1>
+                <h1 className="font-bold text-2xl md:text-3xl mb-2">Group User</h1>
                 <Breadcrumb>
                     <Breadcrumb.Item href="/group-user">
                         Group User
@@ -152,84 +152,89 @@ function TambahAnggota() {
                 </Breadcrumb>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 overflow-auto">
-                <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                    <div className="w-full p-4 flex justify-between gap-6">
-                        <form className="w-[24rem]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 overflow-auto">
+                {/* Panel Pegawai */}
+                <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full min-h-[300px]">
+                    <div className="w-full p-3 sm:p-4 flex justify-between gap-4 sm:gap-6">
+                        <form className="w-full sm:w-[24rem]">
                             <input onChange={handleInputChangePegawai}
                                 id="q"
                                 placeholder='cari pegawai'
                                 type="search"
                                 name="search"
-                                className="px-2 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full"
+                                className="px-3 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full text-sm sm:text-base"
                             />
                         </form>
                     </div>
 
                     {pegawais.length > 0 ? (
-                        <Table striped className="text-base">
-                            <Table.Head className="sticky top-0 z-10 bg-white h-20 border-b">
-                                <Table.HeadCell className="text-center sticky w-20">NO</Table.HeadCell>
-                                <Table.HeadCell className="text-center">NIK</Table.HeadCell>
-                                <Table.HeadCell className="text-center">Nama</Table.HeadCell>
-                                <Table.HeadCell className="text-center sticky w-[12rem]">Kontrol</Table.HeadCell>
-                            </Table.Head>
+                        <div className="overflow-x-auto">
+                            <Table striped className="text-sm sm:text-base">
+                                <Table.Head className="sticky top-0 z-10 bg-white h-12 sm:h-20 border-b">
+                                    <Table.HeadCell className="text-center sticky w-10 sm:w-20">NO</Table.HeadCell>
+                                    <Table.HeadCell className="text-center hidden sm:table-cell">NIK</Table.HeadCell>
+                                    <Table.HeadCell className="text-center">Nama</Table.HeadCell>
+                                    <Table.HeadCell className="text-center w-[6rem] sm:w-[12rem]">Kontrol</Table.HeadCell>
+                                </Table.Head>
 
-                            <Table.Body className="divide-y">
-                                {pegawais.map((item, index) =>
-                                (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
-                                    <Table.Cell className="font-bold text-center">
-                                        {((pagination?.current_page ?? 1) - 1) * (pagination?.per_page ?? 50) + index + 1}
-                                    </Table.Cell>
-                                    <Table.Cell>{item.nik}</Table.Cell>
-                                    <Table.Cell>
-                                        <div className="flex flex-col">
-                                            <span>{item.nama}</span>
-                                            {item.nama_group && (
-                                                <span className="text-xs text-gray-500 font-medium italic mt-0.5">
-                                                    Grup saat ini: {item.nama_group} {item.is_leader ? '(Leader)' : ''}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Table.Cell>
-                                    <Table.Cell>
-                                        <div className="w-full flex items-center justify-center gap-6">
-                                            {item.nama_group ? (
-                                                <span className="text-xs text-gray-400 bg-gray-100 border border-gray-200 px-2 py-1 rounded cursor-not-allowed">
-                                                    Sudah Terdaftar
-                                                </span>
-                                            ) : (
-                                                <button onClick={() => addNewAnggota(item.nik)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                    Masukan
-                                                </button>
-                                            )}
-                                        </div>
-                                    </Table.Cell>
-                                </Table.Row>)
-                                )}
+                                <Table.Body className="divide-y">
+                                    {pegawais.map((item, index) =>
+                                    (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
+                                        <Table.Cell className="font-bold text-center text-xs sm:text-sm">
+                                            {((pagination?.current_page ?? 1) - 1) * (pagination?.per_page ?? 50) + index + 1}
+                                        </Table.Cell>
+                                        <Table.Cell className="hidden sm:table-cell text-xs sm:text-sm">{item.nik}</Table.Cell>
+                                        <Table.Cell>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm">{item.nama}</span>
+                                                {/* Show NIK on mobile inline */}
+                                                <span className="sm:hidden text-[11px] text-gray-400">{item.nik}</span>
+                                                {item.nama_group && (
+                                                    <span className="text-[10px] sm:text-xs text-gray-500 font-medium italic mt-0.5">
+                                                        Grup: {item.nama_group} {item.is_leader ? '(Leader)' : ''}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="w-full flex items-center justify-center">
+                                                {item.nama_group ? (
+                                                    <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-100 border border-gray-200 px-1.5 sm:px-2 py-1 rounded cursor-not-allowed whitespace-nowrap">
+                                                        Terdaftar
+                                                    </span>
+                                                ) : (
+                                                    <button onClick={() => addNewAnggota(item.nik)} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 text-xs sm:text-sm">
+                                                        Masukan
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </Table.Cell>
+                                    </Table.Row>)
+                                    )}
 
-                            </Table.Body>
-                        </Table>
+                                </Table.Body>
+                            </Table>
+                        </div>
                     ) : (<DataFetchingNotFound />)}
 
                     {/* Pagination Controls */}
                     {pagination && pagination.last_page > 1 && (
-                        <div className="flex items-center justify-between px-4 py-3 border-t">
-                            <div className="text-sm text-gray-600">
-                                Halaman {pagination.current_page} dari {pagination.last_page} ({pagination.total} pegawai)
+                        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-t">
+                            <div className="text-xs sm:text-sm text-gray-600">
+                                Hal {pagination.current_page}/{pagination.last_page} <span className="hidden sm:inline">({pagination.total} pegawai)</span>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2">
                                 <button
                                     onClick={() => setPagePegawai(pagination.current_page - 1)}
                                     disabled={pagination.current_page === 1}
-                                    className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Prev
                                 </button>
                                 <button
                                     onClick={() => setPagePegawai(pagination.current_page + 1)}
                                     disabled={pagination.current_page === pagination.last_page}
-                                    className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Next
                                 </button>
@@ -238,52 +243,64 @@ function TambahAnggota() {
                     )}
                 </div>
 
-                <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                    <div className="w-full p-4 flex justify-between gap-6">
-                        <form className="w-[24rem]">
+                {/* Panel Anggota */}
+                <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full min-h-[300px]">
+                    <div className="w-full p-3 sm:p-4 flex justify-between gap-4 sm:gap-6">
+                        <form className="w-full sm:w-[24rem]">
                             <input
                                 id="q"
                                 placeholder='cari anggota'
                                 type="search"
                                 onChange={handleInputChangeAnggota}
-                                className="px-2 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full"
+                                className="px-3 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full text-sm sm:text-base"
                             />
                         </form>
                     </div>
 
                     {anggota.length > 0 ? (
-                        <Table striped className="text-base">
-                            <Table.Head className="sticky top-0 z-10 bg-white h-20 border-b">
-                                <Table.HeadCell className="text-center sticky w-20">NO</Table.HeadCell>
-                                <Table.HeadCell className="text-center">NIK</Table.HeadCell>
-                                <Table.HeadCell className="text-center">Nama</Table.HeadCell>
-                                <Table.HeadCell className="text-center">Lead</Table.HeadCell>
-                                <Table.HeadCell className="text-center sticky w-[12rem]">Kontrol</Table.HeadCell>
-                            </Table.Head>
+                        <div className="overflow-x-auto">
+                            <Table striped className="text-sm sm:text-base">
+                                <Table.Head className="sticky top-0 z-10 bg-white h-12 sm:h-20 border-b">
+                                    <Table.HeadCell className="text-center sticky w-10 sm:w-20">NO</Table.HeadCell>
+                                    <Table.HeadCell className="text-center hidden sm:table-cell">NIK</Table.HeadCell>
+                                    <Table.HeadCell className="text-center">Nama</Table.HeadCell>
+                                    <Table.HeadCell className="text-center hidden sm:table-cell">Lead</Table.HeadCell>
+                                    <Table.HeadCell className="text-center">Kontrol</Table.HeadCell>
+                                </Table.Head>
 
-                            <Table.Body className="divide-y">
-                                {anggota.map((item, index) =>
-                                (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
-                                    <Table.Cell className="font-bold text-center">{index + 1}</Table.Cell>
-                                    <Table.Cell>{item.nik}</Table.Cell>
-                                    <Table.Cell>{item.nama}</Table.Cell>
-                                    <Table.Cell>{item.is_leader}</Table.Cell>
-                                    <Table.Cell>
-                                        <div className="w-full flex items-center justify-center gap-6">
-                                            <button onClick={() => hapusAnggota(item.id)} className="font-medium text-red-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                Hapus Anggota
-                                            </button>
+                                <Table.Body className="divide-y">
+                                    {anggota.map((item, index) =>
+                                    (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
+                                        <Table.Cell className="font-bold text-center text-xs sm:text-sm">{index + 1}</Table.Cell>
+                                        <Table.Cell className="hidden sm:table-cell text-xs sm:text-sm">{item.nik}</Table.Cell>
+                                        <Table.Cell>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm">{item.nama}</span>
+                                                {/* Show NIK and leader status on mobile inline */}
+                                                <span className="sm:hidden text-[11px] text-gray-400">
+                                                    {item.nik} {item.is_leader ? '· Leader' : ''}
+                                                </span>
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell className="hidden sm:table-cell">{item.is_leader}</Table.Cell>
+                                        <Table.Cell>
+                                            <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-4">
+                                                <button onClick={() => hapusAnggota(item.id)} className="font-medium text-red-600 hover:underline active:scale-95 text-xs sm:text-sm whitespace-nowrap">
+                                                    Hapus
+                                                </button>
 
-                                            <button onClick={() => jadikanLeader(item.id)} className="font-medium text-red-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                Jadikan Leader
-                                            </button>
-                                        </div>
-                                    </Table.Cell>
-                                </Table.Row>)
-                                )}
+                                                <button onClick={() => jadikanLeader(item.id)} className="font-medium text-cyan-600 hover:underline active:scale-95 text-xs sm:text-sm whitespace-nowrap">
+                                                    <span className="hidden sm:inline">Jadikan Leader</span>
+                                                    <span className="sm:hidden">Leader</span>
+                                                </button>
+                                            </div>
+                                        </Table.Cell>
+                                    </Table.Row>)
+                                    )}
 
-                            </Table.Body>
-                        </Table>
+                                </Table.Body>
+                            </Table>
+                        </div>
                     ) : (<DataFetchingNotFound />)}
                 </div>
             </div>

@@ -88,36 +88,36 @@ function DetailUserComponent() {
 
     if (user) {
         return (
-            <div className='overflow-hidden py-3 pr-3 grid grid-rows-[auto_1fr] gap-4'>
+            <div className='overflow-hidden py-3 px-3 md:pr-3 md:pl-0 grid grid-rows-[auto_1fr] gap-4'>
                 {/* Card atas: form edit username & password */}
-                <div className="bg-white rounded-md border shadow-sm p-5 w-full">
-                    <h2 className="font-bold text-xl text-gray-700 mb-1">{user.nama}</h2>
-                    <p className="text-sm text-gray-400 mb-4">NIK: {id}</p>
-                    <form onSubmit={handleSimpanCredential} className="flex flex-wrap items-end gap-4">
-                        <div className="flex flex-col gap-1">
+                <div className="bg-white rounded-md border shadow-sm p-4 sm:p-5 w-full">
+                    <h2 className="font-bold text-lg sm:text-xl text-gray-700 mb-1">{user.nama}</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4">NIK: {id}</p>
+                    <form onSubmit={handleSimpanCredential} className="flex flex-col sm:flex-row flex-wrap items-start sm:items-end gap-3 sm:gap-4">
+                        <div className="flex flex-col gap-1 w-full sm:w-auto">
                             <label className="text-sm font-medium text-gray-600">Username</label>
                             <input
                                 type="text"
                                 value={usernameInput}
                                 onChange={(e) => setUsernameInput(e.target.value)}
                                 required
-                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-60"
+                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-full sm:w-60"
                             />
                         </div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 w-full sm:w-auto">
                             <label className="text-sm font-medium text-gray-600">Password</label>
                             <input
                                 type="text"
                                 value={passwordInput}
                                 onChange={(e) => setPasswordInput(e.target.value)}
                                 required
-                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-60"
+                                className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-full sm:w-60"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={loadingSave}
-                            className="px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full sm:w-auto px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loadingSave ? 'Menyimpan...' : 'Simpan'}
                         </button>
@@ -126,43 +126,45 @@ function DetailUserComponent() {
 
                 {/* Card bawah: tabel akses */}
                 <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                    <div className="w-full p-4 flex justify-between gap-6">
-                        <form id="search-form" role="search" className="w-[24rem]">
+                    <div className="w-full p-3 sm:p-4 flex justify-between gap-4 sm:gap-6">
+                        <form id="search-form" role="search" className="w-full sm:w-[24rem]">
                             <input
                                 id="q"
                                 placeholder='cari akses'
                                 type="search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="px-2 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full"
+                                className="px-3 py-2 outline-none border-gray-200 border rounded-md bg-gray-50 w-full text-sm sm:text-base"
                             />
                         </form>
                     </div>
 
                     {Object.keys(user).length > 0 ? (
-                        <Table striped className="text-base">
-                            <Table.Head className="sticky top-0 z-10 bg-white h-20 border-b">
-                                <Table.HeadCell className="text-center">Nama Akses</Table.HeadCell>
-                                <Table.HeadCell className="text-center">Akses</Table.HeadCell>
-                                <Table.HeadCell className="text-center sticky w-[12rem]">Kontrol</Table.HeadCell>
-                            </Table.Head>
+                        <div className="overflow-x-auto">
+                            <Table striped className="text-sm sm:text-base">
+                                <Table.Head className="sticky top-0 z-10 bg-white h-14 sm:h-20 border-b">
+                                    <Table.HeadCell className="text-center">Nama Akses</Table.HeadCell>
+                                    <Table.HeadCell className="text-center">Akses</Table.HeadCell>
+                                    <Table.HeadCell className="text-center sticky w-[6rem] sm:w-[12rem]">Kontrol</Table.HeadCell>
+                                </Table.Head>
 
-                            <Table.Body className="divide-y">
-                                {Object.entries(user)
-                                    .filter(([key]) => !['nama', 'id_user', 'id_user_plain', 'password'].includes(key))
-                                    .filter(([key]) => key.toLowerCase().includes(search.toLowerCase())).map(([key, value]) => (
-                                        <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={key}>
-                                            <Table.Cell>{key}</Table.Cell>
-                                            <Table.Cell className={`${String(value) !== 'true' ? 'text-red-400' : 'text-green-400'}`}>{String(value)}</Table.Cell>
-                                            <Table.Cell>
-                                                <button onClick={() => { handleClickGanti(key, `${String(value)}`) }} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                    Ganti
-                                                </button>
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    ))}
-                            </Table.Body>
-                        </Table>
+                                <Table.Body className="divide-y">
+                                    {Object.entries(user)
+                                        .filter(([key]) => !['nama', 'id_user', 'id_user_plain', 'password'].includes(key))
+                                        .filter(([key]) => key.toLowerCase().includes(search.toLowerCase())).map(([key, value]) => (
+                                            <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={key}>
+                                                <Table.Cell className="text-xs sm:text-sm">{key}</Table.Cell>
+                                                <Table.Cell className={`text-xs sm:text-sm ${String(value) !== 'true' ? 'text-red-400' : 'text-green-400'}`}>{String(value)}</Table.Cell>
+                                                <Table.Cell>
+                                                    <button onClick={() => { handleClickGanti(key, `${String(value)}`) }} className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 text-sm">
+                                                        Ganti
+                                                    </button>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        ))}
+                                </Table.Body>
+                            </Table>
+                        </div>
                     ) : (
                         <DataFetchingNotFound />
                     )}

@@ -171,9 +171,9 @@ function GroupUserComponent() {
     }
 
     return (
-        <div className='overflow-hidden py-3 pr-3 grid grid-rows-[5rem_10rem_1fr] gap-4'>
+        <div className='overflow-hidden py-3 px-3 md:pr-3 md:pl-0 grid grid-rows-[auto_auto_1fr] gap-3 sm:gap-4'>
             <div className="text-gray-600">
-                <h1 className="font-bold text-3xl mb-2">Group User</h1>
+                <h1 className="font-bold text-2xl md:text-3xl mb-2">Group User</h1>
                 <Breadcrumb>
                     <Breadcrumb.Item href="/">
                         Group User
@@ -181,20 +181,20 @@ function GroupUserComponent() {
                 </Breadcrumb>
             </div>
 
-            <div className="bg-white rounded-md border shadow-sm w-full h-full flex items-center px-6">
-                <form className="flex items-center gap-4" onSubmit={handleSubmitCreateSatuan}>
+            <div className="bg-white rounded-md border shadow-sm w-full p-4 sm:px-6 sm:py-5">
+                <form className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4" onSubmit={handleSubmitCreateSatuan}>
                     <label className="text-sm font-medium text-gray-600 whitespace-nowrap">Nama Group</label>
                     <input
                         id="email1"
                         name="nama_group"
                         type="text"
                         required
-                        className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-72"
+                        className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-full sm:w-72"
                     />
                     <button
                         type="submit"
                         disabled={loadingAdd}
-                        className="px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto px-5 py-2 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-white font-medium rounded-md whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                     >
                         {loadingAdd ? 'Menyimpan...' : 'Tambah Group User Baru'}
                     </button>
@@ -203,94 +203,103 @@ function GroupUserComponent() {
             </div>
 
             {!isLoading && !error && <div className="bg-white rounded-md border shadow-sm overflow-auto w-full h-full">
-                <div className="w-full p-4 flex justify-between gap-6">
+                <div className="w-full p-3 sm:p-4 flex justify-between gap-4 sm:gap-6">
                     <SearchBoxComponent placeHolder="Cari Nama Group User" />
                 </div>
 
                 {groupUsers.length > 0 ? (
-                    <Table striped className="text-base">
-                        <Table.Head className="sticky top-0 z-10 bg-white h-20 border-b">
-                            <Table.HeadCell className="text-center sticky w-20">NO</Table.HeadCell>
-                            <Table.HeadCell className="text-center">Nama Group</Table.HeadCell>
-                            <Table.HeadCell className="text-center">Jumlah Anggota</Table.HeadCell>
-                            <Table.HeadCell className="text-center sticky w-[12rem]">Kontrol</Table.HeadCell>
-                        </Table.Head>
+                    <div className="overflow-x-auto">
+                        <Table striped className="text-sm sm:text-base">
+                            <Table.Head className="sticky top-0 z-10 bg-white h-14 sm:h-20 border-b">
+                                <Table.HeadCell className="text-center sticky w-12 sm:w-20">NO</Table.HeadCell>
+                                <Table.HeadCell className="text-center">Nama Group</Table.HeadCell>
+                                <Table.HeadCell className="text-center hidden sm:table-cell">Jumlah Anggota</Table.HeadCell>
+                                <Table.HeadCell className="text-center">Kontrol</Table.HeadCell>
+                            </Table.Head>
 
-                        <Table.Body className="divide-y">
-                            {groupUsers.map((item, index) =>
-                            (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
-                                <Table.Cell className="font-bold text-center">{index + 1}</Table.Cell>
-                                <Table.Cell>
-                                    {editingId === item.id ? (
-                                        <input
-                                            type="text"
-                                            value={editName}
-                                            onChange={(e) => setEditName(e.target.value)}
-                                            disabled={loadingEdit}
-                                            className="px-3 py-1 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-full font-normal"
-                                        />
-                                    ) : (
-                                        item.nama_group
-                                    )}
-                                </Table.Cell>
-                                <Table.Cell>{item.user_to_group_users_count}</Table.Cell>
-                                <Table.Cell>
-                                    <div className="w-full flex items-center justify-center gap-6">
+                            <Table.Body className="divide-y">
+                                {groupUsers.map((item, index) =>
+                                (<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
+                                    <Table.Cell className="font-bold text-center">{index + 1}</Table.Cell>
+                                    <Table.Cell>
                                         {editingId === item.id ? (
-                                            <>
-                                                <button
-                                                    onClick={() => handleSaveEdit(item.id)}
-                                                    disabled={loadingEdit}
-                                                    className="font-medium text-green-600 hover:underline active:scale-95 disabled:opacity-50"
-                                                >
-                                                    {loadingEdit ? 'Menyimpan...' : 'Save'}
-                                                </button>
-                                                <button
-                                                    onClick={() => setEditingId(null)}
-                                                    disabled={loadingEdit}
-                                                    className="font-medium text-gray-500 hover:underline active:scale-95 disabled:opacity-50"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </>
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                disabled={loadingEdit}
+                                                className="px-3 py-1 border border-gray-200 rounded-md bg-gray-50 outline-none focus:border-cyan-400 w-full font-normal text-sm"
+                                            />
                                         ) : (
-                                            <>
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingId(item.id);
-                                                        setEditName(item.nama_group);
-                                                    }}
-                                                    className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95"
-                                                >
-                                                    Edit
-                                                </button>
-
-                                                <Link to={`/group-user/${item.id}`}>
-                                                    <button className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95">
-                                                        Tambah Anggota
-                                                    </button>
-                                                </Link>
-
-                                                <button 
-                                                    disabled={loadingSesuaikanId !== null}
-                                                    onClick={() => { handleSesuaikanUser(item.id) }} 
-                                                    className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-                                                >
-                                                    {loadingSesuaikanId === item.id ? 'Menyesuaikan...' : 'Sesuaikan Akses'}
-                                                </button>
-
-                                                <button onClick={() => { handleDelete(item.id, item.nama_group) }} className="font-medium text-red-600 hover:underline active:scale-95">
-                                                    Hapus
-                                                </button>
-                                            </>
+                                            <div className="flex flex-col">
+                                                <span>{item.nama_group}</span>
+                                                {/* Show member count on mobile inline */}
+                                                <span className="sm:hidden text-xs text-gray-400 mt-0.5">
+                                                    {item.user_to_group_users_count} anggota
+                                                </span>
+                                            </div>
                                         )}
-                                    </div>
-                                </Table.Cell>
-                            </Table.Row>)
-                            )}
+                                    </Table.Cell>
+                                    <Table.Cell className="hidden sm:table-cell">{item.user_to_group_users_count}</Table.Cell>
+                                    <Table.Cell>
+                                        <div className="w-full flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+                                            {editingId === item.id ? (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleSaveEdit(item.id)}
+                                                        disabled={loadingEdit}
+                                                        className="font-medium text-green-600 hover:underline active:scale-95 disabled:opacity-50 text-xs sm:text-sm"
+                                                    >
+                                                        {loadingEdit ? 'Saving...' : 'Save'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingId(null)}
+                                                        disabled={loadingEdit}
+                                                        className="font-medium text-gray-500 hover:underline active:scale-95 disabled:opacity-50 text-xs sm:text-sm"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingId(item.id);
+                                                            setEditName(item.nama_group);
+                                                        }}
+                                                        className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 text-xs sm:text-sm"
+                                                    >
+                                                        Edit
+                                                    </button>
 
-                        </Table.Body>
-                    </Table>
+                                                    <Link to={`/group-user/${item.id}`}>
+                                                        <button className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 text-xs sm:text-sm whitespace-nowrap">
+                                                            <span className="hidden sm:inline">Tambah Anggota</span>
+                                                            <span className="sm:hidden">Anggota</span>
+                                                        </button>
+                                                    </Link>
+
+                                                    <button 
+                                                        disabled={loadingSesuaikanId !== null}
+                                                        onClick={() => { handleSesuaikanUser(item.id) }} 
+                                                        className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline text-xs sm:text-sm whitespace-nowrap"
+                                                    >
+                                                        {loadingSesuaikanId === item.id ? '...' : <><span className="hidden sm:inline">Sesuaikan Akses</span><span className="sm:hidden">Sesuaikan</span></>}
+                                                    </button>
+
+                                                    <button onClick={() => { handleDelete(item.id, item.nama_group) }} className="font-medium text-red-600 hover:underline active:scale-95 text-xs sm:text-sm">
+                                                        Hapus
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </Table.Cell>
+                                </Table.Row>)
+                                )}
+
+                            </Table.Body>
+                        </Table>
+                    </div>
                 ) : (<DataFetchingNotFound />)}
             </div>}
         </div>
